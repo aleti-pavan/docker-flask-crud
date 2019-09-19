@@ -17,6 +17,6 @@ Usage:
 Access:
 -------
 
-http://<ip>:8181
+http://<ip>:5000
 
 where `ip` is either `localhost / 127.0.0.1` or docker ip host.
