@@ -1,2 +1,14 @@
-# docker-flask-crud
-This Repository contains code for flask app with MySQL
+#Docker Flask MySQL crud_flask
+
+A simple CRUD application using Flask and MySQL with docker
+
+Usage:
+------
+
+1. `git clone https://github.com/aleti-pavan/docker-flask-crud.git`
+
+2. `cd docker-flask-crud\`
+
+3. `docker-compose up -d` to start the app in detach mode
+
+4. `docker-compose down` to stop the app
