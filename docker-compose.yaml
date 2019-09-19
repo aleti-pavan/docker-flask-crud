@@ -1,4 +1,4 @@
-version: '2'
+version: '3'
 
 services:
   phonebook-mysql:
@@ -16,5 +16,5 @@ services:
     depends_on:
       - phonebook-mysql
     ports:
-      - "8181:8181"
+      - "5000:5000"
     restart: always
