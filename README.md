@@ -12,3 +12,11 @@ Usage:
 3. `docker-compose up -d` to start the app in detach mode
 
 4. `docker-compose down` to stop the app
+
+
+Access:
+-------
+
+http://<ip>:8181
+
+where `ip` is either `localhost / 127.0.0.1` or docker ip host.
