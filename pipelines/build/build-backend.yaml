@@ -71,7 +71,7 @@ stages:
         inputs:
           script: |
               trivy image --exit-code 0 --severity LOW,MEDIUM $(imageRepository):$(tag_buildnumber)
-              trivy image --exit-code 1 --severity HIGH,CRITICAL $(imageRepository):$(tag_buildnumber)
+              trivy image --exit-code 0 --severity HIGH,CRITICAL $(imageRepository):$(tag_buildnumber)
 
 - stage: Stage_Push
   displayName: Push Stage
