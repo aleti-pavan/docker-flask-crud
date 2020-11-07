@@ -22,7 +22,7 @@ variables:
 
   
   # Scan variables
-  trivyVersion: 0.9.2
+  trivyVersion: 0.12.0
 
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
@@ -50,6 +50,9 @@ stages:
         containerRegistry: $(dockerRegistryServiceConnection)
         repository: $(imageRepository)
         Dockerfile: $(dockerFilePath)
+        tags: |
+            $(tag)
+            $(tag_buildnumber)
 
 - stage: Stage_Scan
   displayName: Scan Stage
@@ -67,8 +70,8 @@ stages:
         displayName: "Run trivy Image scan"
         inputs:
           script: |
-              trivy image --exit-code 0 --severity LOW,MEDIUM $(imageRepository):$(tag)
-              trivy image --exit-code 1 --severity HIGH,CRITICAL $(imageRepository):$(tag)
+              trivy image --exit-code 0 --severity LOW,MEDIUM $(imageRepository):$(tag_buildnumber)
+              trivy image --exit-code 1 --severity HIGH,CRITICAL $(imageRepository):$(tag_buildnumber)
 
 - stage: Stage_Push
   displayName: Push Stage
