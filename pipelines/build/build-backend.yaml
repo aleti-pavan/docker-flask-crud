@@ -54,53 +54,46 @@ stages:
             $(tag)
             $(tag_buildnumber)
 
-- stage: Stage_Scan
-  displayName: Scan Stage
-  jobs:
-    - job: Scan
-      steps:
-      - script: |
-          sudo apt-get install rpm
-          wget https://github.com/aquasecurity/trivy/releases/download/v$(trivyVersion)/trivy_$(trivyVersion)_Linux-64bit.deb
-          sudo dpkg -i trivy_$(trivyVersion)_Linux-64bit.deb
-          trivy -v
-        displayName: 'Setup Trivy Image Scanner'
+  - job: Scan
+    steps:
+    - script: |
+        sudo apt-get install rpm
+        wget https://github.com/aquasecurity/trivy/releases/download/v$(trivyVersion)/trivy_$(trivyVersion)_Linux-64bit.deb
+        sudo dpkg -i trivy_$(trivyVersion)_Linux-64bit.deb
+        trivy -v
+      displayName: 'Setup Trivy Image Scanner'
 
-      - task: CmdLine@2
-        displayName: "Run trivy Image scan"
-        inputs:
-          script: |
-              trivy image --exit-code 0 --severity LOW,MEDIUM $(imageRepository):$(tag)
-              trivy image --exit-code 0 --severity HIGH,CRITICAL $(imageRepository):$(tag)
+    - task: CmdLine@2
+      displayName: "Run trivy Image scan"
+      inputs:
+        script: |
+            trivy image --exit-code 0 --severity LOW,MEDIUM $(imageRepository):$(tag)
+            trivy image --exit-code 0 --severity HIGH,CRITICAL $(imageRepository):$(tag)
 
-- stage: Stage_Push
-  displayName: Push Stage
-  jobs:
-    - job: Push
-      steps:
+  - job: Push
+    steps:
+    ## Docker Push
+    - task: Docker@2
+      displayName: Push Docker Image
+      inputs:
+        command: push
+        containerRegistry: $(dockerRegistryServiceConnection)
+        repository: $(imageRepository)
+        tags: |
+          $(tag)
+          $(tag_buildnumber)
 
-      ## Docker Push
-      - task: Docker@2
-        displayName: Push Docker Image
-        inputs:
-          command: push
-          containerRegistry: $(dockerRegistryServiceConnection)
-          repository: $(imageRepository)
-          tags: |
-            $(tag)
-            $(tag_buildnumber)
+    ## Logout of Docker Hub
+    - task: Docker@2
+      displayName: Logout of DockerHub
+      inputs:
+        command: logout
+        containerRegistry: $(dockerRegistryServiceConnection)
 
-      ## Logout of Docker Hub
-      - task: Docker@2
-        displayName: Logout of DockerHub
-        inputs:
-          command: logout
-          containerRegistry: $(dockerRegistryServiceConnection)
-
-      ## Artifact to drop folder
-      - task: CopyFiles@2
-        displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)'
-        inputs:
-          TargetFolder: '$(Build.ArtifactStagingDirectory)'
-      - task: PublishBuildArtifacts@1
-        displayName: 'Publish Artifact: drop'
+    ## Artifact to drop folder
+    - task: CopyFiles@2
+      displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)'
+      inputs:
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact: drop'
