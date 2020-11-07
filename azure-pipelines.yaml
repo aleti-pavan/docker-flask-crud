@@ -40,7 +40,7 @@ stages:
       vmImage: $(vmImageName)
     steps:
     - task: Docker@2
-      displayName: Login to ACR 
+      displayName: Login to DockerHub 
       inputs:
         command: login
         containerRegistry: $(dockerRegistryServiceConnection)
@@ -55,7 +55,7 @@ stages:
           $(tag_buildnumber)
 
     - task: Docker@2
-      displayName: Logout of ACR
+      displayName: Logout of DockerHub
       inputs:
          command: logout
          containerRegistry: $(dockerRegistryServiceConnection)

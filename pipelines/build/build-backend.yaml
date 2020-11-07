@@ -1,0 +1,90 @@
+# Build and push an image to Azure Container Registry
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+trigger:
+    - master
+   
+   pr:
+     - master
+   
+   resources:
+   - repo: self
+   
+   variables:
+     # BUILD - Container registry service connection established during pipeline creation
+     project: 'phonebook'
+     dockerRegistryServiceConnection: 'pavan-dockerhub'
+     containerRegistry: 'Container Registry'
+     imageRepository: 'aletipavan/phonemysql' 
+     dockerFilePath: '../../Dockerfile-mysql'
+     tag: 'latest'
+     tag_buildnumber: $(Build.BuildNumber)
+   
+     
+     # Deployment variables
+     azureSubscriptionEndpoint: poc1
+     azureResourceGroup: 'just-rg'
+     kubernetesCluster: 'aks-cluster'
+     useClusterAdmin: false
+   
+     # Agent VM image name
+     vmImageName: 'ubuntu-latest'
+   
+   stages:
+   - stage: Build
+     displayName: Build and push stage
+     jobs:  
+     - job: Build
+       displayName: Build
+       pool:
+         vmImage: $(vmImageName)
+       steps:
+       - task: Docker@2
+         displayName: Login to DockerHub 
+         inputs:
+           command: login
+           containerRegistry: $(dockerRegistryServiceConnection)
+       - task: Docker@2
+         displayName: Build and push an Login Image
+         inputs:
+           command: buildAndPush
+           repository: $(imageRepository)
+           dockerfile: $(dockerFilePath)
+           tags: |
+             $(tag)
+             $(tag_buildnumber)
+   
+       - task: Docker@2
+         displayName: Logout of DockerHub
+         inputs:
+            command: logout
+            containerRegistry: $(dockerRegistryServiceConnection)
+         ## Artifact to drop folder
+       - task: CopyFiles@2
+         displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)'
+         inputs:
+           TargetFolder: '$(Build.ArtifactStagingDirectory)'
+       - task: PublishBuildArtifacts@1
+         displayName: 'Publish Artifact: drop'
+   - stage: Deploy
+     displayName: Deploy image
+     jobs:
+       - job: Deploy
+         steps:
+         - task: ShellScript@2
+           displayName: 'Set $(containerRegistry)/$(imageRepository):$(tag_buildnumber) as IMAGE'
+           inputs:
+             scriptPath: deployment.sh
+             args: '$(containerRegistry)/$(imageRepository):$(tag_buildnumber)'
+         # - task: Kubernetes@1
+         #   displayName: kubectl apply $(imageRepository)
+         #   inputs:
+         #     connectionType: Azure Resource Manager
+         #     azureSubscriptionEndpoint: $(azureSubscriptionEndpoint)
+         #     azureResourceGroup: $(azureResourceGroup)
+         #     kubernetesCluster: $(kubernetesCluster)
+         #     useClusterAdmin: $(useClusterAdmin)
+         #     command: apply
+         #     useConfigurationFile: true
+         #     configuration: deployment.yaml
+   
