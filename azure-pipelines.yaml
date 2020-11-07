@@ -2,7 +2,7 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
 trigger:
- - dev
+ - master
 
 pr:
   - master
@@ -14,7 +14,7 @@ variables:
   # BUILD - Container registry service connection established during pipeline creation
   project: 'phonebook'
   dockerRegistryServiceConnection: 'pavan-dockerhub'
-  containerRegistry: 'hub.docker.com'
+  containerRegistry: 'Container Registry'
   imageRepository: 'phonebook' 
   dockerFilePath: 'Dockerfile-app'
   tag: 'latest'
