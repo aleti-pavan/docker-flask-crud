@@ -70,8 +70,8 @@ stages:
         displayName: "Run trivy Image scan"
         inputs:
           script: |
-              trivy image --exit-code 0 --severity LOW,MEDIUM $(imageRepository):$(tag_buildnumber)
-              trivy image --exit-code 0 --severity HIGH,CRITICAL $(imageRepository):$(tag_buildnumber)
+              trivy image --exit-code 0 --severity LOW,MEDIUM $(imageRepository):$(tag)
+              trivy image --exit-code 0 --severity HIGH,CRITICAL $(imageRepository):$(tag)
 
 - stage: Stage_Push
   displayName: Push Stage
