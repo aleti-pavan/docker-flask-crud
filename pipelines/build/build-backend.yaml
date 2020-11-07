@@ -21,11 +21,8 @@ variables:
   tag_buildnumber: $(Build.BuildNumber)
 
   
-  # Deployment variables
-  azureSubscriptionEndpoint: poc1
-  azureResourceGroup: 'just-rg'
-  kubernetesCluster: 'aks-cluster'
-  useClusterAdmin: false
+  # Scan variables
+  trivyVersion: 0.9.2
 
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
@@ -39,21 +36,13 @@ stages:
     pool:
       vmImage: $(vmImageName)
     steps:
+
     - task: Docker@2
       displayName: Login to DockerHub 
       inputs:
         command: login
         containerRegistry: $(dockerRegistryServiceConnection)
-        
-    # - task: Docker@2
-    #   displayName: Build and push an Login Image
-    #   inputs:
-    #     command: buildAndPush
-    #     repository: $(imageRepository)
-    #     dockerfile: $(dockerFilePath)
-    #     tags: |
-    #       $(tag)
-    #       $(tag_buildnumber)
+
     - task: Docker@2
       displayName: Docker Build
       inputs:
@@ -61,51 +50,42 @@ stages:
         containerRegistry: $(dockerRegistryServiceConnection)
         repository: $(imageRepository)
         Dockerfile: $(dockerFilePath)
-    - script: |
-        sudo apt-get install rpm
-        wget https://github.com/aquasecurity/trivy/releases/download/v$(trivyVersion)/trivy_$(trivyVersion)_Linux-64bit.deb
-        sudo dpkg -i trivy_$(trivyVersion)_Linux-64bit.deb
-        trivy -v
-      displayName: 'Setup Trivy Image Scanner'
 
-    - task: CmdLine@2
-      displayName: "Run trivy Image scan"
-      inputs:
-        script: |
-            trivy image --exit-code 0 --severity LOW,MEDIUM $(imageRepository):$(tag)
-            trivy image --exit-code 1 --severity HIGH,CRITICAL $(imageRepository):$(tag)
-
-
-    - task: Docker@2
-      displayName: Logout of DockerHub
-      inputs:
-        command: logout
-        containerRegistry: $(dockerRegistryServiceConnection)
-      ## Artifact to drop folder
-    - task: CopyFiles@2
-      displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)'
-      inputs:
-        TargetFolder: '$(Build.ArtifactStagingDirectory)'
-    - task: PublishBuildArtifacts@1
-      displayName: 'Publish Artifact: drop'
-- stage: Deploy
-  displayName: Deploy image
+- stage: Stage - Scan
+  displayName: Scan Image
   jobs:
-    - job: Deploy
+    - job: Scan Image
       steps:
-      - task: ShellScript@2
-        displayName: 'Set $(containerRegistry)/$(imageRepository):$(tag_buildnumber) as IMAGE'
+      - script: |
+          sudo apt-get install rpm
+          wget https://github.com/aquasecurity/trivy/releases/download/v$(trivyVersion)/trivy_$(trivyVersion)_Linux-64bit.deb
+          sudo dpkg -i trivy_$(trivyVersion)_Linux-64bit.deb
+          trivy -v
+        displayName: 'Setup Trivy Image Scanner'
+
+      - task: CmdLine@2
+        displayName: "Run trivy Image scan"
         inputs:
-          scriptPath: deployment.sh
-          args: '$(containerRegistry)/$(imageRepository):$(tag_buildnumber)'
-      # - task: Kubernetes@1
-      #   displayName: kubectl apply $(imageRepository)
-      #   inputs:
-      #     connectionType: Azure Resource Manager
-      #     azureSubscriptionEndpoint: $(azureSubscriptionEndpoint)
-      #     azureResourceGroup: $(azureResourceGroup)
-      #     kubernetesCluster: $(kubernetesCluster)
-      #     useClusterAdmin: $(useClusterAdmin)
-      #     command: apply
-      #     useConfigurationFile: true
-      #     configuration: deployment.yaml
+          script: |
+              trivy image --exit-code 0 --severity LOW,MEDIUM $(imageRepository):$(tag)
+              trivy image --exit-code 1 --severity HIGH,CRITICAL $(imageRepository):$(tag)
+
+- stage: Stage - Push
+  displayName: Push Image
+  jobs:
+    - job: Push
+      steps:
+      ## Logout of Docker Hub
+      - task: Docker@2
+        displayName: Logout of DockerHub
+        inputs:
+          command: logout
+          containerRegistry: $(dockerRegistryServiceConnection)
+
+      ## Artifact to drop folder
+      - task: CopyFiles@2
+        displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)'
+        inputs:
+          TargetFolder: '$(Build.ArtifactStagingDirectory)'
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish Artifact: drop'
