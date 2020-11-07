@@ -54,7 +54,7 @@ stages:
 - stage: Stage_Scan
   displayName: Scan Stage
   jobs:
-    - job: Scan Image
+    - job: Scan
       steps:
       - script: |
           sudo apt-get install rpm
