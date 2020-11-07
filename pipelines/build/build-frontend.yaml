@@ -31,47 +31,47 @@ stages:
 - stage: Build
   displayName: Build stage
   jobs:  
-    - job: Build
-      displayName: Build
-      pool:
-        vmImage: $(vmImageName)
-      steps:
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: $(vmImageName)
+    steps:
 
-      - task: Docker@2
-        displayName: Login to DockerHub 
-        inputs:
-          command: login
-          containerRegistry: $(dockerRegistryServiceConnection)
+    - task: Docker@2
+      displayName: Login to DockerHub 
+      inputs:
+        command: login
+        containerRegistry: $(dockerRegistryServiceConnection)
 
-      - task: Docker@2
-        displayName: Docker Build
-        inputs:
-          command: build
-          containerRegistry: $(dockerRegistryServiceConnection)
-          repository: $(imageRepository)
-          Dockerfile: $(dockerFilePath)
-          tags: |
-              $(tag)
-              $(tag_buildnumber)
+    - task: Docker@2
+      displayName: Docker Build
+      inputs:
+        command: build
+        containerRegistry: $(dockerRegistryServiceConnection)
+        repository: $(imageRepository)
+        Dockerfile: $(dockerFilePath)
+        tags: |
+            $(tag)
+            $(tag_buildnumber)
 
-    - job: Scan
-      dependsOn: Build
-      steps:
-      - script: |
-          sudo apt-get install rpm
-          wget https://github.com/aquasecurity/trivy/releases/download/v$(trivyVersion)/trivy_$(trivyVersion)_Linux-64bit.deb
-          sudo dpkg -i trivy_$(trivyVersion)_Linux-64bit.deb
-          trivy -v
-        displayName: 'Setup Trivy Image Scanner'
+  - job: Scan
+    dependsOn: Build
+    steps:
+    - script: |
+        sudo apt-get install rpm
+        wget https://github.com/aquasecurity/trivy/releases/download/v$(trivyVersion)/trivy_$(trivyVersion)_Linux-64bit.deb
+        sudo dpkg -i trivy_$(trivyVersion)_Linux-64bit.deb
+        trivy -v
+      displayName: 'Setup Trivy Image Scanner'
 
-      - task: CmdLine@2
-        displayName: "Run trivy Image scan"
-        inputs:
-          script: |
-              trivy image --exit-code 0 --severity LOW,MEDIUM $(imageRepository):$(tag)
-              trivy image --exit-code 0 --severity HIGH,CRITICAL $(imageRepository):$(tag)
+    - task: CmdLine@2
+      displayName: "Run trivy Image scan"
+      inputs:
+        script: |
+            trivy image --exit-code 0 --severity LOW,MEDIUM $(imageRepository):$(tag)
+            trivy image --exit-code 0 --severity HIGH,CRITICAL $(imageRepository):$(tag)
 
-    - job: Push
+  - job: Push
       dependsOn: Scan
       steps:
       ## Docker Push
