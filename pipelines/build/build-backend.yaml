@@ -55,6 +55,7 @@ stages:
             $(tag_buildnumber)
 
   - job: Scan
+    dependsOn: Build
     steps:
     - script: |
         sudo apt-get install rpm
@@ -71,6 +72,7 @@ stages:
             trivy image --exit-code 0 --severity HIGH,CRITICAL $(imageRepository):$(tag)
 
   - job: Push
+    dependsOn: Scan
     steps:
     ## Docker Push
     - task: Docker@2
