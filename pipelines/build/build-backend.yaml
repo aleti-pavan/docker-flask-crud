@@ -51,7 +51,7 @@ stages:
         repository: $(imageRepository)
         Dockerfile: $(dockerFilePath)
 
-- stage: "Stage - Scan"
+- stage: Stage_Scan
   displayName: Scan Image
   jobs:
     - job: Scan Image
@@ -70,11 +70,23 @@ stages:
               trivy image --exit-code 0 --severity LOW,MEDIUM $(imageRepository):$(tag)
               trivy image --exit-code 1 --severity HIGH,CRITICAL $(imageRepository):$(tag)
 
-- stage: "Stage - Push"
+- stage: Stage_Push
   displayName: Push Image
   jobs:
     - job: Push
       steps:
+
+      ## Docker Push
+      - task: Docker@2
+        displayName: Push Docker Image
+        inputs:
+          command: push
+          containerRegistry: $(dockerRegistryServiceConnection)
+          repository: $(imageRepository)
+          tags: |
+            $(tag)
+            $(tag_buildnumber)
+            
       ## Logout of Docker Hub
       - task: Docker@2
         displayName: Logout of DockerHub
