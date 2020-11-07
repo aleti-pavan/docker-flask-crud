@@ -29,7 +29,7 @@ variables:
 
 stages:
 - stage: Build
-  displayName: Build and push stage
+  displayName: Build stage
   jobs:  
   - job: Build
     displayName: Build
@@ -52,7 +52,7 @@ stages:
         Dockerfile: $(dockerFilePath)
 
 - stage: Stage_Scan
-  displayName: Scan Image
+  displayName: Scan Stage
   jobs:
     - job: Scan Image
       steps:
@@ -71,7 +71,7 @@ stages:
               trivy image --exit-code 1 --severity HIGH,CRITICAL $(imageRepository):$(tag)
 
 - stage: Stage_Push
-  displayName: Push Image
+  displayName: Push Stage
   jobs:
     - job: Push
       steps:
@@ -86,7 +86,7 @@ stages:
           tags: |
             $(tag)
             $(tag_buildnumber)
-            
+
       ## Logout of Docker Hub
       - task: Docker@2
         displayName: Logout of DockerHub
