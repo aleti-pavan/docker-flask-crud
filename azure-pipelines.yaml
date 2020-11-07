@@ -15,7 +15,7 @@ variables:
   project: 'phonebook'
   dockerRegistryServiceConnection: 'pavan-dockerhub'
   containerRegistry: 'Container Registry'
-  imageRepository: 'phonebook' 
+  imageRepository: 'aletipavan/phonebook' 
   dockerFilePath: 'Dockerfile-app'
   tag: 'latest'
   tag_buildnumber: $(Build.BuildNumber)
@@ -67,7 +67,7 @@ stages:
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact: drop'
 - stage: Deploy
-  displayName: Deploy image to aks
+  displayName: Deploy image
   jobs:
     - job: Deploy
       steps:
