@@ -80,7 +80,7 @@ stages:
       inputs:
         command: push
         containerRegistry: $(dockerRegistryServiceConnection)
-        repository: $(imageRepository)
+        # repository: $(imageRepository)
         tags: |
           $(tag)
           $(tag_buildnumber)
