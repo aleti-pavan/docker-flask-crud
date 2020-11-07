@@ -16,7 +16,7 @@ variables:
   dockerRegistryServiceConnection: 'pavan-dockerhub'
   containerRegistry: 'Container Registry'
   imageRepository: 'aletipavan/phonebook' 
-  dockerFilePath: '../../Dockerfile-app'
+  dockerFilePath: 'Dockerfile-app'
   tag: 'latest'
   tag_buildnumber: $(Build.BuildNumber)
 

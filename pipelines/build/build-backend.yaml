@@ -16,7 +16,7 @@ variables:
   dockerRegistryServiceConnection: 'pavan-dockerhub'
   containerRegistry: 'Container Registry'
   imageRepository: 'aletipavan/phonemysql' 
-  dockerFilePath: '../../Dockerfile-mysql'
+  dockerFilePath: 'Dockerfile-mysql'
   tag: 'latest'
   tag_buildnumber: $(Build.BuildNumber)
 
