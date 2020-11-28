@@ -1,0 +1,39 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: db
+    labels:
+      tier: backend
+      app: phonebook
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      tier: backend
+      app: phonebook
+  strategy: 
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        tier: backend
+        app: phonebook
+    spec:
+      containers:
+      - image: aletipavan/phonemysql:20201107.2
+        name: backend
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: phonebook-mysql
+  labels:
+    tier: frontend
+    app: phonebook
+spec:
+  ports:
+    - port: 3306    
+  selector:
+      tier: backend
+      app: phonebook
