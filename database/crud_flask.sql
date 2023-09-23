@@ -7,6 +7,9 @@
 -- Server version: 5.7.17-0ubuntu0.16.04.1
 -- PHP Version: 7.0.13-0ubuntu0.16.04.1
 
+ /* Conexão do tracing retornar do banco de dados */
+ /* RETORNA DADOS PRO FRONT */
+
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
 

@@ -5,6 +5,7 @@ Created on Sep 10, 2017
 '''
  #Four Golden Signal por endpoint
  #Latência,Tráfego,Erros,Saturação
+ # Conexão do tracing enviar para o banco de dados
 
 from flask import Flask, flash, render_template, redirect, url_for, request, session
 from module.database import Database
