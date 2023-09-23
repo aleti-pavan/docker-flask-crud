@@ -3,6 +3,8 @@ Created on Sep 10, 2017
 
 @author: Pavan Aleti
 '''
+ #Four Golden Signal por endpoint
+ #Latência,Tráfego,Erros,Saturação
 
 from flask import Flask, flash, render_template, redirect, url_for, request, session
 from module.database import Database
@@ -11,6 +13,9 @@ from module.database import Database
 app = Flask(__name__)
 app.secret_key = "mys3cr3tk3y"
 db = Database()
+
+#log de deBuG
+#Four Golden Signal por LATENCIA
 
 @app.route('/')
 def index():
@@ -21,6 +26,10 @@ def index():
 @app.route('/add/')
 def add():
     return render_template('add.html')
+
+ # Conexão do tracing enviar para o banco de dados
+ #log de INFO
+ #Four Golden Signal por trafégo
 
 @app.route('/addphone', methods = ['POST', 'GET'])
 def addphone():
@@ -34,6 +43,9 @@ def addphone():
     else:
         return redirect(url_for('index'))
 
+        #log de info
+        #Four Golden Signal por trafégo
+
 @app.route('/update/<int:id>/')
 def update(id):
     data = db.read(id);
@@ -43,6 +55,9 @@ def update(id):
     else:
         session['update'] = id
         return render_template('update.html', data = data)
+
+#log de INFO
+#Four Golden Signal por saturação
 
 @app.route('/updatephone', methods = ['POST'])
 def updatephone():
@@ -60,6 +75,9 @@ def updatephone():
     else:
         return redirect(url_for('index'))
 
+        #log de Warn
+        #Four Golden Signal por lantecia
+
 @app.route('/delete/<int:id>/')
 def delete(id):
     data = db.read(id);
@@ -69,6 +87,9 @@ def delete(id):
     else:
         session['delete'] = id
         return render_template('delete.html', data = data)
+
+#log de Warn
+#Four Golden Signal por saturação
 
 @app.route('/deletephone', methods = ['POST'])
 def deletephone():
@@ -85,6 +106,9 @@ def deletephone():
         return redirect(url_for('index'))
     else:
         return redirect(url_for('index'))
+
+      #log de ERROR 404
+      #Four Golden Signal por error
 
 @app.errorhandler(404)
 def page_not_found(error):
